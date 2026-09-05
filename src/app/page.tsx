@@ -1,69 +1,101 @@
-import Image from "next/image";
+import { Navbar } from '@/components/ui/Navbar'
+import { HeroSection } from '@/components/sections/HeroSection'
+import { AboutSection } from '@/components/sections/AboutSection'
+import { ServicesSection } from '@/components/sections/ServicesSection'
+import { ProjectsSection } from '@/components/sections/ProjectsSection'
+import { TestimonialsSection } from '@/components/sections/TestimonialsSection'
+import { ContactSection } from '@/components/sections/ContactSection'
+import { FooterSection } from '@/components/sections/FooterSection'
+import { connectToDatabase } from '@/lib/mongodb'
+import { ensureDatabaseSeeded } from '@/lib/db-init'
+import { ProjectModel } from '@/models/Project'
+import { TestimonialModel } from '@/models/Testimonial'
+import { SiteSettingModel } from '@/models/SiteSetting'
+import type { Project, Testimonial, SiteSettings } from '@/types'
 
-export default function Home() {
+import { SEED_PROJECTS, SEED_TESTIMONIALS } from '@/lib/constants'
+
+export const dynamic = 'force-dynamic'
+
+async function getData() {
+  try {
+    await ensureDatabaseSeeded()
+    await connectToDatabase()
+
+    const [projectDocs, testimonialDocs, heroDoc, aboutDoc] = await Promise.all([
+      ProjectModel.find().sort({ display_order: 1 }).lean(),
+      TestimonialModel.find().sort({ display_order: 1 }).lean(),
+      SiteSettingModel.findOne({ key: 'hero' }).lean(),
+      SiteSettingModel.findOne({ key: 'about' }).lean(),
+    ])
+
+    const projects: Project[] =
+      projectDocs && projectDocs.length > 0
+        ? projectDocs.map((p: any) => ({
+            id: p._id.toString(),
+            title: p.title,
+            slug: p.slug,
+            description: p.description,
+            short_description: p.short_description,
+            cover_image_url: p.cover_image_url,
+            gallery_urls: p.gallery_urls || [],
+            tech_stack: p.tech_stack || [],
+            category: p.category,
+            live_url: p.live_url || null,
+            github_url: p.github_url || null,
+            featured: Boolean(p.featured),
+            display_order: p.display_order ?? 0,
+            created_at: p.createdAt ? new Date(p.createdAt).toISOString() : new Date().toISOString(),
+          }))
+        : SEED_PROJECTS
+
+    const testimonials: Testimonial[] =
+      testimonialDocs && testimonialDocs.length > 0
+        ? testimonialDocs.map((t: any) => ({
+            id: t._id.toString(),
+            client_name: t.client_name,
+            client_role: t.client_role,
+            company: t.company,
+            quote: t.quote,
+            avatar_url: t.avatar_url || null,
+            display_order: t.display_order ?? 0,
+            created_at: t.createdAt ? new Date(t.createdAt).toISOString() : new Date().toISOString(),
+          }))
+        : SEED_TESTIMONIALS
+
+    return {
+      projects,
+      testimonials,
+      settings: {
+        hero: (heroDoc?.value as SiteSettings['hero']) || undefined,
+        about: (aboutDoc?.value as SiteSettings['about']) || undefined,
+      } satisfies SiteSettings,
+    }
+  } catch (error) {
+    console.error('Error fetching homepage data from MongoDB:', error)
+    return {
+      projects: SEED_PROJECTS,
+      testimonials: SEED_TESTIMONIALS,
+      settings: {} as SiteSettings,
+    }
+  }
+}
+
+export default async function HomePage() {
+  const { projects, testimonials, settings } = await getData()
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <>
+      <Navbar />
+      <main>
+        <HeroSection settings={settings.hero} />
+        <AboutSection settings={settings.about} />
+        <ServicesSection />
+        <ProjectsSection projects={projects} />
+        <TestimonialsSection testimonials={testimonials} />
+        <ContactSection />
       </main>
-    </div>
-  );
+      <FooterSection />
+    </>
+  )
 }
