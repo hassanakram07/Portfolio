@@ -13,8 +13,8 @@ import {
   ExternalLink,
   Menu,
   X,
-  Zap,
 } from 'lucide-react'
+import { BrandLogo } from '@/components/ui/BrandLogo'
 import { Button } from '@/components/ui/button'
 import toast from 'react-hot-toast'
 
@@ -79,12 +79,9 @@ export function AdminSidebar() {
     <>
       {/* Mobile Top Header */}
       <div className="md:hidden flex items-center justify-between border-b border-border/40 bg-background/80 backdrop-blur-md px-4 py-3 sticky top-0 z-40">
-        <div className="flex items-center gap-2 font-bold text-foreground">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/20">
-            <Zap className="h-4 w-4 text-primary" />
-          </div>
-          <span className="font-heading text-sm">Portfolio Admin</span>
-        </div>
+        <Link href="/admin">
+          <BrandLogo size="sm" subtitle="Admin Panel" />
+        </Link>
         <Button
           variant="ghost"
           size="sm"
@@ -111,15 +108,9 @@ export function AdminSidebar() {
         }`}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border/40">
-          <Link href="/admin" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/30">
-              <Zap className="h-5 w-5" />
-            </div>
-            <div>
-              <span className="font-heading font-bold text-sm tracking-tight block">Portfolio Admin</span>
-              <span className="text-[10px] text-muted-foreground block font-mono">CMS & Control Panel</span>
-            </div>
+        <div className="flex items-center justify-between p-5 border-b border-border/40">
+          <Link href="/admin" className="focus:outline-none">
+            <BrandLogo size="md" subtitle="CMS & Control Panel" />
           </Link>
           <Button
             variant="ghost"

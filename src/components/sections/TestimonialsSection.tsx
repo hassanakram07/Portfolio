@@ -1,9 +1,9 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import { motion, useInView } from 'framer-motion'
-import { Quote, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { Star, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import type { Testimonial } from '@/types'
 
 interface TestimonialsSectionProps {
@@ -15,7 +15,6 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
   const inView = useInView(ref, { once: true, margin: '-100px' })
   const [current, setCurrent] = useState(0)
 
-  // Auto-advance
   useEffect(() => {
     if (testimonials.length <= 1) return
     const timer = setInterval(() => {
@@ -29,67 +28,66 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
 
   if (testimonials.length === 0) return null
 
+  const t = testimonials[current]
+
   return (
-    <section id="testimonials" className="section-padding bg-muted/20">
-      <div className="container mx-auto max-w-6xl px-4">
+    <section id="testimonials" className="section-padding">
+      <div className="container mx-auto max-w-4xl px-4">
         <motion.div
           ref={ref}
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.6 }}
         >
           {/* Header */}
-          <div className="mb-16 text-center">
+          <div className="mb-12 text-center">
             <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">
-              Testimonials
+              Client Feedback
             </p>
-            <h2 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+            <h2 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
               What Clients Say
             </h2>
           </div>
 
-          {/* Carousel */}
-          <div className="relative mx-auto max-w-3xl">
-            <div className="overflow-hidden rounded-2xl border border-border/50 bg-card p-8 sm:p-12">
-              <Quote className="h-10 w-10 text-primary/30 mb-6" />
+          {/* Card */}
+          <div className="relative">
+            <div className="rounded-2xl border border-border/50 bg-card p-8 sm:p-10">
+              {/* Stars */}
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                ))}
+              </div>
 
-              <motion.div
-                key={current}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.4 }}
-              >
-                <blockquote className="text-lg leading-relaxed text-foreground sm:text-xl mb-8">
-                  &ldquo;{testimonials[current].quote}&rdquo;
-                </blockquote>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={current}
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {/* Quote */}
+                  <p className="text-base sm:text-lg text-foreground/90 leading-relaxed mb-8">
+                    &ldquo;{t.quote}&rdquo;
+                  </p>
 
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12">
-                    {testimonials[current].avatar_url && (
-                      <AvatarImage
-                        src={testimonials[current].avatar_url!}
-                        alt={testimonials[current].client_name}
-                      />
-                    )}
-                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                      {testimonials[current].client_name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-semibold">{testimonials[current].client_name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {testimonials[current].client_role}
-                      {testimonials[current].company && (
-                        <> · {testimonials[current].company}</>
-                      )}
+                  {/* Author */}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                        {t.client_name.split(' ').map((n) => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-semibold text-sm">{t.client_name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {t.client_role}{t.company ? ` · ${t.company}` : ''}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              </AnimatePresence>
             </div>
 
             {/* Navigation */}
@@ -97,7 +95,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
               <div className="mt-6 flex items-center justify-center gap-4">
                 <button
                   onClick={prev}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-border/50 text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors"
                   aria-label="Previous testimonial"
                   id="testimonial-prev-btn"
                 >
@@ -109,7 +107,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
                     <button
                       key={i}
                       onClick={() => setCurrent(i)}
-                      className={`h-2 rounded-full transition-all duration-300 ${
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
                         i === current ? 'w-6 bg-primary' : 'w-2 bg-border'
                       }`}
                       aria-label={`Go to testimonial ${i + 1}`}
@@ -119,7 +117,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
 
                 <button
                   onClick={next}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-border/50 text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors"
                   aria-label="Next testimonial"
                   id="testimonial-next-btn"
                 >

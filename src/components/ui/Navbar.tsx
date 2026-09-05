@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useTheme } from 'next-themes'
-import { Menu, X, Sun, Moon, Zap } from 'lucide-react'
+import { Menu, X, Sun, Moon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { BrandLogo } from '@/components/ui/BrandLogo'
 import { cn } from '@/lib/utils'
 
 const NAV_LINKS = [
@@ -44,12 +45,10 @@ export function Navbar() {
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 font-heading font-bold text-lg"
+          className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
+          id="navbar-brand-logo"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/30">
-            <Zap className="h-4 w-4 text-primary" />
-          </div>
-          <span className="gradient-text">Hassan Akram</span>
+          <BrandLogo size="md" />
         </Link>
 
         {/* Desktop Nav */}
